@@ -1,7 +1,77 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useLanguage } from '../i18n/LanguageContext'
 
 const OFFERS_ACCESS_KEY = 'ynk_offers_access_until'
+
+const OFFERS_UI = {
+  en: {
+    sectionTag: 'Services',
+    title: 'Offers',
+    subtitle: 'Choose a level, compare what is included, and scale smoothly as your needs grow.',
+    accessBanner: 'Offers access expires in',
+    disclosure:
+      'Advanced features, integrations, extra revisions, custom hosting, databases, active AI, WhatsApp, SMS, and third-party provider fees are billed separately when applicable.',
+    levelGuideTitle: 'Level Guide',
+    levelGuideSub: 'Quickly compare each level before opening details.',
+    levelPrefix: 'Level',
+    idealFor: 'Ideal For',
+    included: 'Included',
+    excluded: 'Not Included',
+    importantLimits: 'Important Limits',
+    dataStorage: 'Data and Storage',
+    after14Days: 'After 14 Days',
+    domainHosting: 'Custom Domain and Hosting',
+    revisions: 'Revisions',
+    shellNote: 'Shell / Coquille is a demo environment, not a production platform.',
+    recommendedSupport: 'Recommended Support',
+    viewDetails: 'View Details',
+    openFullPage: 'Open Full Page',
+    done: 'Done',
+    close: 'Close',
+    backToIT: 'Back to IT Services',
+    requestQuote: 'Request a Quote',
+    backToOffers: 'Back to Offers',
+    offerNotFound: 'Offer Not Found',
+    offerNotFoundSub: 'This page does not exist or has moved.',
+    viewAllOffers: 'View All Offers',
+    panelLabel: 'Offer details panel',
+    until: 'until',
+  },
+  fr: {
+    sectionTag: 'Services',
+    title: 'Offres',
+    subtitle: 'Choisissez un niveau, comparez ce qui est inclus, puis evoluez en douceur selon vos besoins.',
+    accessBanner: "L acces aux offres expire dans",
+    disclosure:
+      'Les fonctionnalites avancees, integrations, revisions supplementaires, hebergement personnalise, base de donnees, IA active, WhatsApp, SMS et frais fournisseurs sont factures separement lorsqu ils s appliquent.',
+    levelGuideTitle: 'Guide des Niveaux',
+    levelGuideSub: 'Comparez rapidement chaque niveau avant d ouvrir les details.',
+    levelPrefix: 'Niveau',
+    idealFor: 'Ideal pour',
+    included: 'Inclus',
+    excluded: 'Non inclus',
+    importantLimits: 'Limites importantes',
+    dataStorage: 'Donnees et stockage',
+    after14Days: 'Apres les 14 jours',
+    domainHosting: 'Domaine et hebergement personnalise',
+    revisions: 'Revisions',
+    shellNote: 'La Shell / Coquille est une demo, pas une plateforme de production.',
+    recommendedSupport: 'Support recommande',
+    viewDetails: 'Voir les details',
+    openFullPage: 'Ouvrir la page complete',
+    done: 'Termine',
+    close: 'Fermer',
+    backToIT: 'Retour aux services IT',
+    requestQuote: 'Demander un devis',
+    backToOffers: 'Retour aux offres',
+    offerNotFound: 'Offre introuvable',
+    offerNotFoundSub: 'Cette page n existe pas ou a ete deplacee.',
+    viewAllOffers: 'Voir toutes les offres',
+    panelLabel: 'Panneau de details de l offre',
+    until: 'jusqu au',
+  },
+}
 
 function formatRemainingTime(ms) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -11,17 +81,17 @@ function formatRemainingTime(ms) {
   return `${days}d ${hours}h ${minutes}m`
 }
 
-function OfferDetailContent({ offer }) {
+function OfferDetailContent({ offer, ui }) {
   return (
     <>
       <div className="offer-meta-row offer-meta-banner">
-        <span>Ideal For</span>
+        <span>{ui.idealFor}</span>
         <strong>{offer.idealFor}</strong>
       </div>
 
       <div className="offer-detail-grid">
         <div className="offer-panel">
-          <h2>Inclus</h2>
+          <h2>{ui.included}</h2>
           <ul className="offer-list">
             {offer.included.map((item) => (
               <li key={item}>{item}</li>
@@ -31,7 +101,7 @@ function OfferDetailContent({ offer }) {
 
         {offer.excluded && (
           <div className="offer-panel">
-            <h2>Non inclus</h2>
+            <h2>{ui.excluded}</h2>
             <ul className="offer-list offer-list-muted">
               {offer.excluded.map((item) => (
                 <li key={item}>{item}</li>
@@ -45,8 +115,8 @@ function OfferDetailContent({ offer }) {
 
       {offer.limitations && (
         <div className="offer-panel" style={{ marginTop: '20px' }}>
-          <h2>Limites importantes</h2>
-          <p className="offer-body">La Shell / Coquille est une demo, pas une plateforme de production.</p>
+          <h2>{ui.importantLimits}</h2>
+          <p className="offer-body">{ui.shellNote}</p>
           <ul className="offer-list offer-list-muted">
             {offer.limitations.map((item) => (
               <li key={item}>{item}</li>
@@ -57,7 +127,7 @@ function OfferDetailContent({ offer }) {
 
       {offer.dataStorage && (
         <div className="offer-panel" style={{ marginTop: '20px' }}>
-          <h2>Donnees et stockage</h2>
+          <h2>{ui.dataStorage}</h2>
           <p className="offer-body">{offer.dataStorage}</p>
           <p className="offer-body">{offer.dbAddon}</p>
         </div>
@@ -65,21 +135,21 @@ function OfferDetailContent({ offer }) {
 
       {offer.postPeriod && (
         <div className="offer-panel" style={{ marginTop: '20px' }}>
-          <h2>Apres les 14 jours</h2>
+          <h2>{ui.after14Days}</h2>
           <p className="offer-body">{offer.postPeriod}</p>
         </div>
       )}
 
       {offer.domainHosting && (
         <div className="offer-panel" style={{ marginTop: '20px' }}>
-          <h2>Domaine et hebergement personnalise</h2>
+          <h2>{ui.domainHosting}</h2>
           <p className="offer-body">{offer.domainHosting}</p>
         </div>
       )}
 
       {offer.revisions && (
         <div className="offer-panel" style={{ marginTop: '20px' }}>
-          <h2>Revisions</h2>
+          <h2>{ui.revisions}</h2>
           <p className="offer-body">{offer.revisions}</p>
         </div>
       )}
@@ -209,6 +279,8 @@ const OFFERS = [
 
 function OffersOverview({ accessInfo }) {
   const [selectedOffer, setSelectedOffer] = useState(null)
+  const { language } = useLanguage()
+  const ui = language === 'fr' ? OFFERS_UI.fr : OFFERS_UI.en
 
   useEffect(() => {
     if (!selectedOffer) {
@@ -235,12 +307,9 @@ function OffersOverview({ accessInfo }) {
     <>
       <section className="page-hero">
         <div className="container">
-          <span className="section-tag">Services</span>
-          <h1 className="section-title">Offers</h1>
-          <p className="section-subtitle">
-            Start quickly with clear and practical service packages.
-            Pricing shown reflects starter rates.
-          </p>
+          <span className="section-tag">{ui.sectionTag}</span>
+          <h1 className="section-title">{ui.title}</h1>
+          <p className="section-subtitle">{ui.subtitle}</p>
         </div>
       </section>
 
@@ -248,24 +317,43 @@ function OffersOverview({ accessInfo }) {
         <div className="container">
           {accessInfo && (
             <div className="offer-note" style={{ marginBottom: '16px' }}>
-              Offers access expires in <strong>{accessInfo.remaining}</strong> (until {accessInfo.expiresAt}).
+              {ui.accessBanner} <strong>{accessInfo.remaining}</strong> ({ui.until} {accessInfo.expiresAt}).
             </div>
           )}
           <div className="offer-note">
-            Advanced features, integrations, extra revisions, custom hosting, databases,
-            active AI, WhatsApp, SMS, and third-party provider fees are billed separately
-            when applicable.
+            {ui.disclosure}
+          </div>
+
+          <div className="offer-level-guide">
+            <div className="offer-level-guide-head">
+              <h2>{ui.levelGuideTitle}</h2>
+              <p>{ui.levelGuideSub}</p>
+            </div>
+            <div className="offer-level-guide-grid">
+              {OFFERS.map((offer) => (
+                <button
+                  key={`level-guide-${offer.id}`}
+                  type="button"
+                  className="offer-level-chip"
+                  onClick={() => setSelectedOffer(offer)}
+                >
+                  <span>{ui.levelPrefix} {offer.level}</span>
+                  <strong>{offer.title}</strong>
+                  <small>{offer.price}</small>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="offer-summary-grid">
             {OFFERS.map((offer) => (
               <article className="offer-summary-card" key={offer.id}>
-                <span className="project-tag">Niveau {offer.level}</span>
+                <span className="project-tag">{ui.levelPrefix} {offer.level}</span>
                 <h3>{offer.title}</h3>
                 <p className="offer-price">{offer.price}</p>
                 <p>{offer.idealFor}</p>
                 <div className="offer-meta-row">
-                  <span>Recommended Support</span>
+                  <span>{ui.recommendedSupport}</span>
                   <strong>{offer.support}</strong>
                 </div>
                 <button
@@ -273,7 +361,7 @@ function OffersOverview({ accessInfo }) {
                   className="btn btn-secondary"
                   onClick={() => setSelectedOffer(offer)}
                 >
-                  View Details
+                  {ui.viewDetails}
                 </button>
               </article>
             ))}
@@ -281,27 +369,27 @@ function OffersOverview({ accessInfo }) {
 
           <div className="detail-action" style={{ marginTop: '28px' }}>
             <Link to="/it-services" className="btn btn-secondary">
-              Back to IT Services
+              {ui.backToIT}
             </Link>
             <Link to="/request-quote?category=it" className="btn btn-primary" style={{ marginLeft: '12px' }}>
-              Request a Quote
+              {ui.requestQuote}
             </Link>
           </div>
         </div>
       </section>
 
       {selectedOffer && (
-        <div className="offer-drawer-layer" role="dialog" aria-modal="true" aria-label="Offer details panel">
+        <div className="offer-drawer-layer" role="dialog" aria-modal="true" aria-label={ui.panelLabel}>
           <button
             type="button"
             className="offer-drawer-backdrop"
             onClick={() => setSelectedOffer(null)}
-            aria-label="Close details panel"
+            aria-label={ui.close}
           />
           <aside className="offer-drawer">
             <div className="offer-drawer-header">
               <div>
-                <span className="project-tag">Niveau {selectedOffer.level}</span>
+                <span className="project-tag">{ui.levelPrefix} {selectedOffer.level}</span>
                 <h2>{selectedOffer.title}</h2>
                 <p className="offer-price">{selectedOffer.price}</p>
                 <p className="offer-body">{selectedOffer.intro}</p>
@@ -310,7 +398,7 @@ function OffersOverview({ accessInfo }) {
                 type="button"
                 className="offer-drawer-close"
                 onClick={() => setSelectedOffer(null)}
-                aria-label="Close"
+                aria-label={ui.close}
               >
                 ×
               </button>
@@ -318,18 +406,18 @@ function OffersOverview({ accessInfo }) {
 
             {accessInfo && (
               <div className="offer-note" style={{ marginBottom: '16px' }}>
-                Offers access expires in <strong>{accessInfo.remaining}</strong> (until {accessInfo.expiresAt}).
+                {ui.accessBanner} <strong>{accessInfo.remaining}</strong> ({ui.until} {accessInfo.expiresAt}).
               </div>
             )}
 
-            <OfferDetailContent offer={selectedOffer} />
+            <OfferDetailContent offer={selectedOffer} ui={ui} />
 
             <div className="detail-action" style={{ marginTop: '24px' }}>
               <Link to={`/it-services/offers/${selectedOffer.id}`} className="btn btn-secondary">
-                Open Full Page
+                {ui.openFullPage}
               </Link>
               <button type="button" className="btn btn-primary" onClick={() => setSelectedOffer(null)}>
-                Done
+                {ui.done}
               </button>
             </div>
           </aside>
@@ -340,11 +428,14 @@ function OffersOverview({ accessInfo }) {
 }
 
 function OfferDetail({ offer, accessInfo }) {
+  const { language } = useLanguage()
+  const ui = language === 'fr' ? OFFERS_UI.fr : OFFERS_UI.en
+
   return (
     <>
       <section className="page-hero">
         <div className="container">
-          <span className="section-tag">Niveau {offer.level}</span>
+          <span className="section-tag">{ui.levelPrefix} {offer.level}</span>
           <h1 className="section-title">{offer.title}</h1>
           <p className="section-subtitle">{offer.intro}</p>
           <p className="offer-price" style={{ marginTop: '12px' }}>{offer.price}</p>
@@ -355,17 +446,17 @@ function OfferDetail({ offer, accessInfo }) {
         <div className="container">
           {accessInfo && (
             <div className="offer-note" style={{ marginBottom: '16px' }}>
-              Offers access expires in <strong>{accessInfo.remaining}</strong> (until {accessInfo.expiresAt}).
+              {ui.accessBanner} <strong>{accessInfo.remaining}</strong> ({ui.until} {accessInfo.expiresAt}).
             </div>
           )}
-          <OfferDetailContent offer={offer} />
+          <OfferDetailContent offer={offer} ui={ui} />
 
           <div className="detail-action" style={{ marginTop: '28px' }}>
             <Link to="/it-services/offers" className="btn btn-secondary">
-              Back to Offers
+              {ui.backToOffers}
             </Link>
             <Link to="/request-quote?category=it" className="btn btn-primary" style={{ marginLeft: '12px' }}>
-              Request a Quote
+              {ui.requestQuote}
             </Link>
           </div>
         </div>
@@ -376,6 +467,8 @@ function OfferDetail({ offer, accessInfo }) {
 
 export default function ServiceOffers() {
   const { offerId } = useParams()
+  const { language } = useLanguage()
+  const ui = language === 'fr' ? OFFERS_UI.fr : OFFERS_UI.en
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
@@ -405,10 +498,10 @@ export default function ServiceOffers() {
     return (
       <section className="detail-section" style={{ paddingTop: '160px' }}>
         <div className="container">
-          <h1 className="section-title">Offer Not Found</h1>
-          <p className="section-subtitle">This page does not exist or has moved.</p>
+          <h1 className="section-title">{ui.offerNotFound}</h1>
+          <p className="section-subtitle">{ui.offerNotFoundSub}</p>
           <div className="detail-action" style={{ marginTop: '20px' }}>
-            <Link to="/it-services/offers" className="btn btn-secondary">View All Offers</Link>
+            <Link to="/it-services/offers" className="btn btn-secondary">{ui.viewAllOffers}</Link>
           </div>
         </div>
       </section>
